@@ -1,0 +1,28 @@
+@use "sass:math";
+@use "sass:list";
+@use "number";
+
+$elves: (0);
+
+@each $value in input() {
+  @if str-length($value) == 0 {
+    $elves: append($elves, 0);
+  } @else {
+    $calories: list.nth($elves, -1) + number.from-string($value);
+    $elves: list.set-nth($elves, -1, $calories);
+  }
+}
+
+$sum-top-three: 0;
+
+@for $_ from 1 through 3 {
+  $top: math.max($elves...);
+  $index: list.index($elves, $top);
+  $elves: list.set-nth($elves, $index, 0);
+
+  $sum-top-three: $sum-top-three + $top;
+}
+
+* {
+  --total-calories: #{$sum-top-three};
+}

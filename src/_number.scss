@@ -1,0 +1,55 @@
+@function from-string($string) {
+  $strings: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9";
+  $numbers: 0 1 2 3 4 5 6 7 8 9;
+
+  $result: 0;
+  $minus: false;
+  $divider: 0;
+
+  @for $i from 1 through str-length($string) {
+    $character: str-slice($string, $i, $i);
+
+    @if $i == 1 and $character == "-" {
+      $minus: true;
+    } @else if $character == "." {
+      @if not $divider == 0 {
+        @warn "too many decimal places";
+        @return false;
+      }
+      $divider: 1;
+    } @else {
+      $index: index($strings, $character);
+      @if not $index {
+        @return if($minus, $result * -1, $result);
+        @return _length($result, str-slice($string, $i));
+      }
+
+      $number: nth($numbers, $index);
+
+      @if $divider == 0 {
+        $result: $result * 10;
+      } @else {
+        $divider: $divider * 10;
+        $number: $number / $divider;
+      }
+
+      $result: $result + $number;
+    }
+  }
+
+  @return if($minus, $result * -1, $result);
+}
+
+@function _length($number, $unit) {
+  $strings: "px" "cm" "mm" "%" "ch" "pica" "in" "em" "rem" "pt" "pc" "ex" "vw"
+    "vh" "vmin" "vmax";
+  $units: 1px 1cm 1mm 1% 1ch 1pica 1in 1em 1rem 1pt 1pc 1ex 1vw 1vh 1vmin 1vmax;
+  $index: index($strings, $unit);
+
+  @if not $index {
+    @warn "Unknown unit `#{$unit}`.";
+    @return false;
+  }
+
+  @return $number * nth($units, $index);
+}
