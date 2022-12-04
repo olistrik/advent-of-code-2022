@@ -1,0 +1,23 @@
+@use "sass:list";
+
+@function map-rps($input) {
+  $_rps: "A" "B" "C" "Y" "Z" "X";
+  @return (list.index($_rps, $input) - 1) % 3;
+}
+
+@function score($elf, $outcome) {
+  $me: ($elf + $outcome) % 3;
+  @return list.nth(3 6 0, $outcome + 1) + $me + 1;
+}
+
+$total-score: 0;
+
+@each $line in input() {
+  $elf: map-rps(str-slice($line, 1, 1));
+  $outcome: map-rps(str-slice($line, 3, 3));
+  $total-score: $total-score + score($elf, $outcome);
+}
+
+* {
+  --total-score: #{$total-score};
+}
