@@ -4,3 +4,21 @@
 @function char($string, $index) {
   @return string.slice($string, $index, $index);
 }
+
+@function split($string, $sub) {
+  $sublen: string.length($sub);
+  $length: string.length($string);
+  $strings: ();
+
+  @while true {
+    $split: string.index($string, $sub);
+    @if not $split {
+      $strings: append($strings, $string);
+      @return $strings;
+    }
+    $strings: append($strings, string.slice($string, 1, $split - 1));
+    $string: string.slice($string, $split + $sublen, $length);
+
+    $length: string.length($string);
+  }
+}

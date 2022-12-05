@@ -1,0 +1,39 @@
+@use "sass:math";
+@use "sass:meta";
+
+@use "list";
+@use "string";
+@use "number";
+
+@function parse-ranges($value) {
+  @return list.map(
+    string.split($value, "-"),
+    meta.get-function("from-string", $module: "number")
+  );
+}
+
+$count: 0;
+
+@each $line in input() {
+  $ranges: list.map(
+    string.split($line, ","),
+    meta.get-function("parse-ranges")
+  );
+
+  $first: list.nth($ranges, 1);
+  $second: list.nth($ranges, 2);
+
+  $sum: 0;
+
+  @if list.nth($first, 1) <=
+    list.nth($second, 2) and
+    list.nth($first, 2) >=
+    list.nth($second, 1)
+  {
+    $count: $count + 1;
+  }
+}
+
+* {
+  --count: #{$count};
+}
