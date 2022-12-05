@@ -1,0 +1,40 @@
+@use "sass:math";
+@use "sass:meta";
+
+// internal lib
+@use "boolean";
+@use "string";
+@use "list";
+@use "map";
+
+$_abc: a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K
+  L M N O P Q R S T U V W X Y Z;
+
+$total: 0;
+
+@each $line in input() {
+  $length: math.div(string.length($line), 2);
+
+  $pack-a: map.of($_abc, false);
+  $pack-b: $pack-a;
+
+  @for $i from 1 through $length {
+    $pack-a: map.set($pack-a, string.char($line, $i), true);
+    $pack-b: map.set($pack-b, string.char($line, $length + $i), true);
+  }
+
+  $result: list.map(
+    list.zip(map.values($pack-a), map.values($pack-b)),
+    meta.get-function("and-of", $module: "boolean")
+  );
+
+  @for $i from 1 through 52 {
+    @if list.nth($result, $i) {
+      $total: $total + $i;
+    }
+  }
+}
+
+* {
+  --total: #{$total};
+}

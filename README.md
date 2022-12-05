@@ -1,9 +1,9 @@
 # Rules
 
-All functions must be in scss. The only exception is the `input()` function.
-This returns the second file provided to the compile script as an array of lines.
+All functions must be in scss. The only exceptions are:
 
-If inputs get to big, then a buffered input reader might be needed.
+- `input()`: custom function that returns the input file as an array of lines.
+- `read-line()`: custom function that returns the next line of the file.
 
 # Usage
 

@@ -1,0 +1,12 @@
+@use "sass:map";
+@forward "sass:map";
+
+@function of($keys, $value: null) {
+  $map: ();
+
+  @each $key in $keys {
+    $map: map.set($map, $key, $value);
+  }
+
+  @return $map;
+}

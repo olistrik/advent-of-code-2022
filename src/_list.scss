@@ -1,0 +1,23 @@
+@use "sass:meta";
+
+@forward "sass:list";
+
+@function of($length, $value: null) {
+  $list: ();
+
+  @for $_ from 1 through $length {
+    $list: append($list, $value);
+  }
+
+  @return $list;
+}
+
+@function map($list, $func) {
+  $result: ();
+
+  @each $value in $list {
+    $result: append($result, meta.call($func, $value));
+  }
+
+  @return $result;
+}

@@ -1,0 +1,53 @@
+@use "sass:math";
+@use "sass:meta";
+
+// internal lib
+@use "boolean";
+@use "string";
+@use "list";
+@use "map";
+
+$_abc: a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K
+  L M N O P Q R S T U V W X Y Z;
+
+@function next-three() {
+  $packs: list.of(52, true);
+
+  @for $_ from 1 through 3 {
+    $line: read-line();
+    $length: string.length($line);
+    @if $length == 0 {
+      @return false;
+    }
+
+    $pack: map.of($_abc, false);
+
+    @for $i from 1 through $length {
+      $pack: map.set($pack, string.char($line, $i), true);
+    }
+
+    $packs: list.map(
+      list.zip($packs, map.values($pack)),
+      meta.get-function("and-of", $module: "boolean")
+    );
+  }
+  @return $packs;
+}
+
+$total: 0;
+
+$common: next-three();
+@while $common {
+  @if $common {
+    @for $i from 1 through 52 {
+      @if list.nth($common, $i) {
+        $total: $total + $i;
+      }
+    }
+  }
+  $common: next-three();
+}
+
+* {
+  --total: #{$total};
+}

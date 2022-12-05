@@ -13,6 +13,9 @@ const result = sass.compile(file, {
     "input()": function () {
       return new sass.SassList(lines.map((val) => new sass.SassString(val)));
     },
+    "read-line()": function () {
+      return new sass.SassString(lines.shift());
+    },
   },
 });
 

@@ -1,0 +1,6 @@
+@use "sass:string";
+@forward "sass:string";
+
+@function char($string, $index) {
+  @return string.slice($string, $index, $index);
+}

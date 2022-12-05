@@ -1,0 +1,9 @@
+@use "list";
+
+@function and-of($values) {
+  $result: true;
+  @each $value in $values {
+    $result: $result and $value;
+  }
+  @return $result;
+}
