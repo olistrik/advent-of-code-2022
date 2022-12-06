@@ -1,0 +1,28 @@
+@use "list";
+@use "string";
+
+@function isMarker($marker) {
+  $length: string.length($marker);
+  @for $i from 1 to $length {
+    @for $j from $i + 1 through $length {
+      @if string.char($marker, $i) == string.char($marker, $j) {
+        @return false;
+      }
+    }
+  }
+  @return true;
+}
+
+@function find-marker($msg, $length) {
+  @for $idx from 1 through string.length($msg) - $length {
+    @if isMarker(string.slice($msg, $idx, $idx + $length - 1)) {
+      @return $idx + $length - 1;
+    }
+  }
+}
+
+* {
+  @each $msg in input() {
+    --marker-after: #{find-marker($msg, 4)};
+  }
+}

@@ -58,3 +58,7 @@
   }
   @return $result;
 }
+
+@function shift($list, $count: 1) {
+  @return slice($list, $count + 1);
+}

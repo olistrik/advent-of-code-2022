@@ -1,0 +1,7 @@
+@use "6a" as a;
+
+* {
+  @each $msg in input() {
+    --marker-after: #{a.find-marker($msg, 14)};
+  }
+}
