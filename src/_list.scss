@@ -1,5 +1,5 @@
 @use "sass:meta";
-
+@use "sass:list";
 @forward "sass:list";
 
 @function of($length, $value: null) {
@@ -19,5 +19,42 @@
     $result: append($result, meta.call($func, $value));
   }
 
+  @return $result;
+}
+
+@function pad($list, $length, $value: null) {
+  @while list.length($list) < $length {
+    $list: append($list, $value);
+  }
+  @return $list;
+}
+
+@function remove-all($list, $match) {
+  $result: ();
+  @each $value in $list {
+    @if $value != $match {
+      $result: append($result, $value);
+    }
+  }
+  @return $result;
+}
+
+@function slice($list, $start: 1, $end: -1) {
+  $result: ();
+
+  @if $start < 0 {
+    $start: list.length($list) + $start + 1;
+  }
+  @if $end < 0 {
+    $end: list.length($list) + $end + 1;
+  }
+
+  @if $start == 0 or $end == 0 {
+    @return ();
+  }
+
+  @for $i from $start through $end {
+    $result: append($result, list.nth($list, $i));
+  }
   @return $result;
 }

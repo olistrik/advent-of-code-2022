@@ -1,0 +1,99 @@
+@use "sass:math";
+@use "sass:meta";
+
+@use "list";
+@use "map";
+@use "string";
+@use "number";
+
+$stack-lines: ();
+$labels: null;
+$stacks: ();
+
+$stacking: true;
+
+@function remove-nulls($list) {
+  @return list.remove-all($list, null);
+}
+
+@function parse-stack($line) {
+  $length: string.length($line);
+  @if $length == 0 {
+    $length: list.length($labels);
+    $staged: ();
+
+    @for $i from list.length($stack-lines) through 1 {
+      $stack: list.nth($stack-lines, $i);
+      $staged: append($staged, list.pad($stack, $length));
+    }
+
+    $staged: list.zip(
+      $labels,
+      list.map(list.zip($staged...), meta.get-function("remove-nulls"))
+    );
+
+    @each $stack in $staged {
+      $stacks: map.set($stacks, $stack...) !global;
+    }
+
+    @return false;
+  }
+
+  @if $labels {
+    $stack-lines: append($stack-lines, $labels) !global;
+  }
+  $labels: () !global;
+
+  $idx: 2;
+
+  @while $idx < $length {
+    $char: string.char($line, $idx);
+    @if $char == " " {
+      $char: null;
+    }
+    $labels: append($labels, $char) !global;
+    $idx: $idx + 4;
+  }
+
+  @return true;
+}
+
+@function stacks-pop($key, $count) {
+  $stack: map.get($stacks, $key);
+  $stacks: map.set($stacks, $key, list.slice($stack, 1, -1 - $count)) !global;
+  @return list.slice($stack, -$count, -1);
+}
+
+@function stacks-push($key, $crates...) {
+  $stack: list.join(map.get($stacks, $key), $crates);
+  $stacks: map.set($stacks, $key, $stack) !global;
+  @return $stack;
+}
+
+@function parse-move($line) {
+  $line: string.split($line, " ");
+  $count: number.from-string(list.nth($line, 2));
+  $from: list.nth($line, 4);
+  $to: list.nth($line, 6);
+
+  $crates: stacks-pop($from, $count);
+  $stack: stacks-push($to, $crates...);
+  @return $line;
+}
+
+@each $line in input() {
+  @if $stacking {
+    $stacking: parse-stack($line);
+  } @else {
+    $line: parse-move($line);
+  }
+}
+
+$top-stack: "";
+@each $_, $stack in $stacks {
+  $top-stack: $top-stack + list.nth($stack, -1);
+}
+
+* {
+  --top-stack: #{$top-stack};
+}
