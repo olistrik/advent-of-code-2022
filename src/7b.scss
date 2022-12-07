@@ -1,0 +1,82 @@
+@use "string";
+@use "list";
+@use "number";
+@use "map";
+@use "sass:meta";
+
+// map of folder names to size
+$folders: ();
+
+$pwd: ();
+
+@function pwd($args...) {
+  @return list.join($pwd, $args);
+}
+
+@function set-size($size) {
+  $folders: map.set($folders, pwd(size, $size)...) !global;
+  @return $folders;
+}
+
+@function add-size($size) {
+  @return set-size(map.get($folders, pwd(size)...) + $size);
+}
+
+@function parse-command($_, $cmd, $path: false) {
+  @if $path {
+    @if $path == ".." {
+      $pwd: list.slice($pwd, 1, -2) !global;
+    } @else {
+      $pwd: append($pwd, $path) !global;
+      $folders: map.set($folders, pwd(size, 0)...) !global;
+    }
+  }
+  @return undefined;
+}
+
+$line: read-line();
+@while $line != "" {
+  $cmd: string.split($line, " ");
+  $part: list.nth($cmd, 1);
+
+  @if $part == "$" {
+    $_: parse-command($cmd...);
+  } @else if $part != "dir" {
+    $_: add-size(number.from-string($part));
+  }
+
+  $line: read-line();
+}
+
+$smallest: null;
+$required: null;
+
+@function flatten($map) {
+  $values: map.values($map);
+  $size: 0;
+  @each $value in $values {
+    @if meta.type-of($value) == map {
+      $value: flatten($value);
+    }
+    $size: $size + $value;
+  }
+  @if $required !=
+    null and
+    $size >=
+    $required and
+    ($smallest == null or $size < $smallest)
+  {
+    $smallest: $size !global;
+  }
+
+  @return $size;
+}
+
+$used: flatten($folders);
+$required: 30000000 - (70000000 - $used);
+$used: flatten($folders);
+/*
+
+#{$smallest}
+
+*/
