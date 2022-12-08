@@ -1,0 +1,62 @@
+@use "string";
+@use "list";
+@use "number";
+@use "map";
+@use "sass:math";
+@use "sass:meta";
+
+$trees: ();
+@function get-tree($x, $y) {
+  @return map.get($trees, $y, $x);
+}
+
+@function search($h, $x, $y, $dx, $dy) {
+  $tree: get-tree($x + $dx, $y + $dy);
+
+  @if $tree {
+    @if $tree >= $h {
+      @return 1;
+    } @else {
+      @return 1 + search($h, $x + $dx, $y + $dy, $dx, $dy);
+    }
+  }
+  @return 0;
+}
+
+@each $line in input() {
+  $y: list.length($trees) + 1;
+
+  $row: list.map(
+    string.to-list($line),
+    meta.get-function(from-string, $module: number)
+  );
+  @for $x from 1 through list.length($row) {
+    $trees: map.set($trees, $y, $x, list.nth($row, $x));
+  }
+}
+
+$height: list.length($trees);
+$width: list.length(map.get($trees, 1));
+
+$best: 0;
+
+@for $x from 2 through $width - 1 {
+  @for $y from 2 through $height - 1 {
+    $h: get-tree($x, $y);
+    $up: search($h, $x, $y, 0, -1);
+    $down: search($h, $x, $y, 0, 1);
+    $left: search($h, $x, $y, -1, 0);
+    $right: search($h, $x, $y, 1, 0);
+
+    $score: $up * $down * $left * $right;
+    @if $score > $best {
+      $best: $score;
+    }
+  }
+}
+
+/*
+
+#{$best}
+
+*/

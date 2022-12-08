@@ -1,0 +1,97 @@
+@use "string";
+@use "list";
+@use "number";
+@use "map";
+@use "sass:math";
+@use "sass:meta";
+
+$trees: ();
+$visiblity: ();
+
+$visible: 0;
+
+@function get-tree($x, $y) {
+  @return map.get($trees, $y, $x);
+}
+
+@function get-height($x, $y) {
+  $tree: get-tree($x, $y);
+
+  @if not $tree {
+    @return undefined;
+  }
+
+  @return list.nth($tree, 1);
+}
+
+@function get-directions($_, $directions...) {
+  @return $directions;
+}
+
+@function add-directions($x, $y, $values...) {
+  $tree: get-tree($x, $y);
+  @return map.set($trees, $y, $x, list.join($tree, $values));
+}
+
+@function visible($height, $directions...) {
+  @return math.min($directions...) < $height;
+}
+
+@function search-right($x, $y, $left) {
+  $height: get-height($x, $y);
+  @if $height == undefined {
+    @return -1;
+  }
+
+  $right: search-right($x + 1, $y, math.max($height, $left));
+
+  $directions: join(get-directions(get-tree($x, $y)...), ($left, $right));
+
+  @if visible($height, $directions...) {
+    $visible: $visible + 1 !global;
+  }
+
+  @return math.max($height, $right);
+}
+
+@function search-down($x, $y, $up) {
+  $height: get-height($x, $y);
+  @if $height == undefined {
+    @return -1;
+  }
+
+  $down: search-down($x, $y + 1, math.max($height, $up));
+
+  $trees: add-directions($x, $y, $up, $down) !global;
+
+  @return math.max($height, $down);
+}
+
+@each $line in input() {
+  $y: list.length($trees) + 1;
+
+  $row: list.map(
+    string.to-list($line),
+    meta.get-function(from-string, $module: number)
+  );
+  @for $x from 1 through list.length($row) {
+    $trees: map.set($trees, $y, $x, list.nth($row, $x));
+  }
+}
+
+$height: list.length($trees);
+$width: list.length(map.get($trees, 1));
+
+@for $x from 1 through $width {
+  $_: search-down($x, 1, -1);
+}
+
+@for $y from 1 through $height {
+  $_: search-right(1, $y, -1);
+}
+
+/*
+
+#{$visible}
+
+*/

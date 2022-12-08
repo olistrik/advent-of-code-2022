@@ -22,3 +22,13 @@
     $length: string.length($string);
   }
 }
+
+@function to-list($string) {
+  $list: ();
+
+  @for $i from 1 through string.length($string) {
+    $list: append($list, char($string, $i));
+  }
+
+  @return $list;
+}
