@@ -1,0 +1,58 @@
+@use "string";
+@use "list";
+@use "number";
+@use "map";
+@use "sass:meta";
+
+$usage: 0;
+
+@each $line in input() {
+  $cmd: string.split($line, " ");
+  $part: list.nth($cmd, 1);
+
+  @if $part != "dir" and $part != "$" {
+    $usage: $usage + number.from-string($part);
+  }
+}
+
+$required: 30000000 - (70000000 - $usage);
+$smallest: null;
+$size: 0;
+$stack: ();
+
+@function parse-command($_, $cmd, $path: false) {
+  @if $path {
+    @if $path == ".." {
+      @if $size >= $required and ($smallest == null or $size < $smallest) {
+        $smallest: $size !global;
+      }
+      $size: list.nth($stack, 1) + $size !global;
+      $stack: list.shift($stack...) !global;
+    } @else {
+      $stack: list.join(($size), $stack) !global;
+      $size: 0 !global;
+    }
+  }
+  @return undefined;
+}
+
+@each $line in input() {
+  $cmd: string.split($line, " ");
+  $part: list.nth($cmd, 1);
+
+  @if $part == "$" {
+    $_: parse-command($cmd...);
+  } @else if $part != "dir" {
+    $size: $size + number.from-string($part);
+  }
+}
+
+@while list.length($stack) > 0 {
+  $_: parse-command("$", "cd", "..");
+}
+
+/*
+
+#{$smallest}
+
+*/
